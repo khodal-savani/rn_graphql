@@ -15,10 +15,10 @@ This React Native app fetches and displays data about countries using a GraphQL 
 
 ## Installation
 
-1. Clone the repository:
-   ```sh
-   git clone https://github.com/khodal-savani/rn_graphql.git
-   ```
+- Clone the repository:
+  ```sh
+  git clone https://github.com/khodal-savani/rn_graphql.git
+  ```
 
 ## Step 1: Start the Metro Server
 
