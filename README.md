@@ -2,7 +2,24 @@ This is a new [**React Native**](https://reactnative.dev) project, bootstrapped 
 
 # Getting Started
 
->**Note**: Make sure you have completed the [React Native - Environment Setup](https://reactnative.dev/docs/environment-setup) instructions till "Creating a new application" step, before proceeding.
+> **Note**: Make sure you have completed the [React Native - Environment Setup](https://reactnative.dev/docs/environment-setup) instructions till "Creating a new application" step, before proceeding.
+
+# CountriesGraphQLApp
+
+This React Native app fetches and displays data about countries using a GraphQL API. The app is built with TypeScript and Apollo Client.
+
+## Features
+
+- Fetch and display a list of countries
+- Display country details like code, name, and emoji
+
+## Installation
+
+Clone the repository:
+
+````sh
+git clone https://github.com/khodal-savani/rn_graphql.git
+
 
 ## Step 1: Start the Metro Server
 
@@ -16,7 +33,7 @@ npm start
 
 # OR using Yarn
 yarn start
-```
+````
 
 ## Step 2: Start your Application
 
