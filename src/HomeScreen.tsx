@@ -1,40 +1,89 @@
-import React from 'react';
-import { View, Text, ActivityIndicator, FlatList, StyleSheet } from 'react-native';
-import { useQuery } from '@apollo/client';
-import { GET_COUNTRIES } from './queries';
+
+import React, { useState, useEffect } from 'react';
+import { View, Text, TextInput, Button, FlatList, StyleSheet, ActivityIndicator, Alert, SafeAreaView, TouchableOpacity } from 'react-native';
+import { useLazyQuery, useQuery } from '@apollo/client';
+import { GET_COUNTRY, GET_COUNTRIES } from './queries';
+
+interface Language {
+    code: string;
+    name: string;
+}
 
 interface Country {
     name: string;
-    emoji: string;
+    native: string;
     capital: string;
+    emoji: string;
+    currency: string;
+    languages: Language[];
 }
 
-const HomeScreen = () => {
-    const { loading, error, data } = useQuery<{ countries: Country[] }>(GET_COUNTRIES);
+interface CountryListItem {
+    code: string;
+    name: string;
+    emoji: string;
+}
 
-    if (loading) return <ActivityIndicator size="large" color="#0000ff" />;
-    if (error) return <Text>Error: {error.message}</Text>;
+const HomeScreen: React.FC = () => {
+    const [code, setCode] = useState('');
+    const [countryDetail, setCountryDetail] = useState<Country | null>(null);
+    const [getCountry, { loading: countryLoading, data: countryData, error: countryError }] = useLazyQuery<{ country: Country }>(GET_COUNTRY);
+    const { loading: countriesLoading, data: countriesData, error: countriesError } = useQuery<{ countries: CountryListItem[] }>(GET_COUNTRIES);
+
+    const handleGetCountry = () => {
+        if (!code.trim()) {
+            Alert.alert('Validation Error', 'Country code cannot be blank');
+            return;
+        }
+        getCountry({ variables: { code: code.toUpperCase() } });
+    };
+
+    const handleCountryPress = (countryCode: string) => {
+        getCountry({ variables: { code: countryCode } });
+    };
+
+    useEffect(() => {
+        if (countryData?.country) {
+            setCountryDetail(countryData.country);
+        }
+    }, [countryData]);
+
+    useEffect(() => {
+        if (countryDetail) {
+            Alert.alert(
+                `Details for ${countryDetail.name}`,
+                `Name: ${countryDetail.name}\nNative: ${countryDetail.native}\nCapital: ${countryDetail.capital}\nEmoji: ${countryDetail.emoji}\nCurrency: ${countryDetail.currency}\nLanguages: ${countryDetail.languages.map(lang => lang.name).join(', ')}`
+            );
+            setCountryDetail(null);
+        }
+    }, [countryDetail]);
+
+    if (countriesLoading) return <ActivityIndicator size="large" color="#0000ff" />;
+    if (countriesError) return <Text>Error: {countriesError.message}</Text>;
 
     return (
         <View style={styles.container}>
-            <View style={styles.headerView}>
-                <Text style={styles.pageTitle}>Country's List Using GraphQL</Text>
-            </View>
-            <View style={styles.tableHeader}>
-                <Text style={styles.tableTitle}>Name</Text>
-                <Text style={styles.tableTitle}>Flag</Text>
-                <Text style={styles.tableTitle}>Capital</Text>
-            </View>
+            <TextInput
+                placeholder="Enter country code (e.g., BR)"
+                style={styles.input}
+                value={code}
+                onChangeText={setCode}
+            />
+            <Button title="Get Country" onPress={handleGetCountry} />
+            {countryLoading && <ActivityIndicator size="large" color="#0000ff" />}
+            {countryError && <Text>Error: {countryError.message}</Text>}
+
             <FlatList
-                data={data?.countries}
+                data={countriesData?.countries}
                 renderItem={({ item }) => (
-                    <View style={styles.tableRow}>
-                        <Text style={styles.cell}>{item.name}</Text>
-                        <Text style={styles.cell}>{item.emoji}</Text>
-                        <Text style={styles.cell}>{item.capital}</Text>
-                    </View>
+                    <TouchableOpacity onPress={() => handleCountryPress(item.code)}>
+                        <View style={styles.row}>
+                            <Text style={styles.cell}>{item.emoji}</Text>
+                            <Text style={styles.cell}>{item.name}</Text>
+                        </View>
+                    </TouchableOpacity>
                 )}
-                keyExtractor={(item) => item.name}
+                keyExtractor={(item) => item.code}
             />
         </View>
     );
@@ -42,38 +91,23 @@ const HomeScreen = () => {
 
 const styles = StyleSheet.create({
     container: {
-        padding: 16
+        padding: 16,
     },
-    headerView: {
-        height: 50
+    input: {
+        height: 40,
+        borderColor: 'gray',
+        borderWidth: 1,
+        marginVertical: 10,
+        padding: 10,
     },
-    pageTitle: {
-        textAlign: 'center',
-        fontSize: 20,
-        fontWeight: 500
-    },
-    tableHeader: {
+    row: {
         flexDirection: 'row',
-        justifyContent: 'space-between',
-        paddingVertical: 10,
-        backgroundColor: '#f2f2f2',
-    },
-    tableTitle: {
-        fontWeight: 'bold',
-        fontSize: 16,
-        flex: 1,
-        textAlign: 'center',
-    },
-    tableRow: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
         paddingVertical: 10,
         borderBottomWidth: 1,
         borderBottomColor: '#e0e0e0',
     },
     cell: {
-        flex: 1,
-        textAlign: 'center',
+        marginRight: 10
     },
 });
 
