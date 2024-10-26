@@ -11,7 +11,8 @@ This React Native app fetches and displays data about countries using a GraphQL 
 ## Features
 
 - Fetch and display a list of countries
-- Display country details like code, name, and emoji
+- Show detailed information about a country in an alert when the country is clicked
+- Search for a country by code and display its details in an alert
 
 ## Installation
 
